@@ -1,0 +1,52 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'com.fox2code'
+version =  project['foxflexver.version']
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+
+    withSourcesJar()
+    withJavadocJar()
+}
+
+jar {
+    from "../LICENSE"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+afterEvaluate {
+    publishing {
+        repositories {
+            maven {
+                url = rootProject.layout.buildDirectory.dir('repo')
+            }
+        }
+        publications {
+            release(MavenPublication) {
+                from components.java
+                groupId = "com.fox2code"
+                artifactId = project.name
+                pom {
+                    url = 'https://github.com/Fox2Code/FoxFlexVer'
+                }
+            }
+        }
+    }
+}
