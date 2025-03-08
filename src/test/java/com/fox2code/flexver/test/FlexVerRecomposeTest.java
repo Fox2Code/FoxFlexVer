@@ -23,4 +23,10 @@ public class FlexVerRecomposeTest {
         checkRecompose("1.0.0", "1.0.0+test2.0.*");
         checkRecompose("1.0.0>=", "1.0.0+test2.0>=");
     }
+
+    @Test
+    public void testRecomposeWildcard() {
+        checkRecomposeExact("*");
+        checkRecompose("*", ".*");
+    }
 }

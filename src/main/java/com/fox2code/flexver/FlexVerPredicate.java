@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class FlexVerPredicate {
+    public static final FlexVerPredicate ANY = new FlexVerPredicate(
+            FlexVerPredicateType.MATCH, FlexVerParserImpl.NULL_VERSION_COMPONENT_ARRAY);
     private final FlexVerPredicateType flexVerPredicateType;
     final VersionComponent[] versionComponents;
 
@@ -37,7 +39,7 @@ public class FlexVerPredicate {
 
     @Override
     public String toString() {
-        return FlexVerParserImpl.recompose(this.versionComponents) + this.flexVerPredicateType.sign;
+        return this.flexVerPredicateType.recompose(this.versionComponents);
     }
 
     /**
@@ -46,6 +48,9 @@ public class FlexVerPredicate {
      * @return the compiled predicate, may return a {@link FlexVer} if the input string is a regular predicate.
      */
     public static FlexVerPredicate parse(String flexVerPredicate) {
+        if ("*".equals(flexVerPredicate)) {
+            return ANY;
+        }
         int lengthToParse = flexVerPredicate.length();
         FlexVerPredicateType predicateType = FlexVerPredicateType.EQUAL;
         for (FlexVerPredicateType type : FlexVerPredicateType.VALUES) {
@@ -60,8 +65,12 @@ public class FlexVerPredicate {
         if (lengthToParse == flexVerPredicate.length()) {
             return FlexVer.parse(flexVerPredicate);
         }
-        return new FlexVerPredicate(predicateType,
-                FlexVerParserImpl.decomposeImpl(flexVerPredicate, lengthToParse));
+        VersionComponent[] versionComponents =
+                FlexVerParserImpl.decomposeImpl(flexVerPredicate, lengthToParse);
+        if (predicateType == FlexVerPredicateType.MATCH && versionComponents.length == 0) {
+            return ANY;
+        }
+        return new FlexVerPredicate(predicateType, versionComponents);
     }
 
     public enum FlexVerPredicateType {
@@ -71,7 +80,7 @@ public class FlexVerPredicate {
                 return FlexVerParserImpl.compare(version, check) >= 0;
             }
         },
-        LESS_EQUAL("<=") {
+        LESSER_EQUAL("<=") {
             @Override
             boolean match(VersionComponent[] version, VersionComponent[] check) {
                 return FlexVerParserImpl.compare(version, check) <= 0;
@@ -83,7 +92,7 @@ public class FlexVerPredicate {
                 return FlexVerParserImpl.compare(version, check) > 0;
             }
         },
-        LESS("<") {
+        LESSER("<") {
             @Override
             boolean match(VersionComponent[] version, VersionComponent[] check) {
                 return FlexVerParserImpl.compare(version, check) < 0;
@@ -103,6 +112,11 @@ public class FlexVerPredicate {
             boolean match(VersionComponent[] version, VersionComponent[] check) {
                 return FlexVerParserImpl.flexVerMatch(version, check);
             }
+
+            @Override
+            String recompose(VersionComponent[] check) {
+                return check.length == 0 ? "*" : super.recompose(check);
+            }
         };
 
         private static final FlexVerPredicateType[] VALUES = FlexVerPredicateType.values();
@@ -114,6 +128,10 @@ public class FlexVerPredicate {
             this.internal = sign.startsWith(".");
         }
 
-        abstract boolean match(VersionComponent[] self, VersionComponent[] other);
+        abstract boolean match(VersionComponent[] version, VersionComponent[] check);
+
+        String recompose(VersionComponent[] check) {
+            return FlexVerParserImpl.recompose(check) + this.sign;
+        }
     }
 }

@@ -30,6 +30,22 @@ public final class FlexVer extends FlexVerPredicate implements Comparable<FlexVe
         return FlexVerParserImpl.compare(this.versionComponents, other.versionComponents) >= 0;
     }
 
+    public boolean isLesser(String other) {
+        return FlexVerParserImpl.compare(this.versionComponents, FlexVerParserImpl.decompose(other)) < 0;
+    }
+
+    public boolean isLesser(FlexVer other) {
+        return FlexVerParserImpl.compare(this.versionComponents, other.versionComponents) < 0;
+    }
+
+    public boolean isLesserOrEqual(String other) {
+        return FlexVerParserImpl.compare(this.versionComponents, FlexVerParserImpl.decompose(other)) <= 0;
+    }
+
+    public boolean isLesserOrEqual(FlexVer other) {
+        return FlexVerParserImpl.compare(this.versionComponents, other.versionComponents) <= 0;
+    }
+
     @Override
     public String toString() {
         return FlexVerParserImpl.recompose(this.versionComponents);

@@ -26,4 +26,11 @@ public class FlexVerPredicateTest {
         checkPredicate("1.0.*", "1.1.0", false);
         checkPredicate("1.0.*", "2.0.0", false);
     }
+
+    @Test
+    public void testComparingWildcard() {
+        checkPredicate("*", "1.0.0", true);
+        checkPredicate("*", "0.0.0", true);
+        checkPredicate("*", "", true);
+    }
 }

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.fox2code'
-version =  project['foxflexver.version']
+version = project['foxflexver.version']
 
 repositories {
     mavenCentral()
